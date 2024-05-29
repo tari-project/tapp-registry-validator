@@ -66,7 +66,9 @@
     ]
   },
   "dependencies": {
-    "@actions/core": "^1.10.1"
+    "@actions/core": "^1.10.1",
+    "@metamask/utils": "^8.4.0",
+    "semver": "^7.6.2"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
@@ -84,7 +86,9 @@
     "make-coverage-badge": "^1.2.0",
     "prettier": "^3.2.5",
     "prettier-eslint": "^16.3.0",
+    "superstruct": "^1.0.4",
     "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   }
 }

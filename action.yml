@@ -1,23 +1,25 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Test action'
 
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
   icon: 'heart'
-  color: 'red'
+  color: 'yellow'
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  packageName:
+    description: 'Tapplet package name'
     required: true
-    default: '1000'
+    default: 'tapplet-example'
+  manifestVersion:
+    description: 'Next version number'
+    required: true
+    default: '1.0.0'
 
 # Define your outputs here.
 outputs:
-  time:
-    description: 'Your output description here'
+  status:
+    description: 'Status of tapplet registration process'
 
 runs:
   using: node20

@@ -1,0 +1,34 @@
+{
+  "packageName": "@karczuRF/tapplet-example",
+  "version": "0.2.6",
+  "displayName": "Tapplet v2.6 human readable name",
+  "status": "MVP",
+  "category": "defi",
+  "author": {
+    "name": "karczuRF",
+    "website": "https://github.com/karczuRF"
+  },
+  "about": {
+    "summary": "Tapp example for playground",
+    "description": "This is the simplest example of a tapplet. v0.2.0"
+  },
+  "design": {
+    "logoPath": "./dist/assets/logo.svg",
+    "backgroundPath": "./dist/assets/logo.svg"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/karczuRF/tapp-example.git",
+    "author": "@karczuRF",
+    "codeowners": ["@karczuRF"]
+  },
+  "source": {
+    "location": {
+      "npm": {
+        "packageName": "tapp-example",
+        "registry": "https://registry.npmjs.org/"
+      }
+    }
+  },
+  "manifestVersion": "0.1.0"
+}
