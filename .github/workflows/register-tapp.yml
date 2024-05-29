@@ -1,4 +1,4 @@
-name: CI
+name: 'Register Tapplet'
 
 on:
   workflow_dispatch:
@@ -12,20 +12,13 @@ on:
         default: '1.0.0'
         required: false
 
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
-
 permissions:
   actions: write
   contents: write # to generate json file
 
 jobs:
-  test-typescript:
-    name: TypeScript Tests
+  register-tapplet:
+    name: Registry Test
     runs-on: ubuntu-latest
 
     steps:
@@ -44,20 +37,12 @@ jobs:
         id: npm-ci
         run: npm ci
 
-  test-action:
-    name: Registry Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
-
-      - name: Test Creating Registry Action
-        id: test-action
+      - name: Add tapplet to the registry
+        id: add-tapp
         uses: ./
         with:
-          manifestVersion: 2.0.4
+          package-name: ${{ github.event.inputs.package-name }}
+          manifest-version: ${{ github.event.inputs.manifest-ersion }}
 
       - name: Print Output
         id: status

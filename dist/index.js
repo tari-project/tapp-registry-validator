@@ -31683,10 +31683,10 @@ const registry_1 = __nccwpck_require__(2113);
  */
 async function run() {
     try {
-        const packageName = core.getInput('packageName');
+        const packageName = core.getInput('package-name');
         core.notice(`The ${packageName} tapplet registration process started...`);
         // Add new tapplet to the registry
-        const ver = core.getInput('manifestVersion');
+        const ver = core.getInput('manifest-version');
         (0, registry_1.addTappletToRegistry)(ver, packageName);
         core.info('Registry updated.');
         // Set outputs for other workflow steps to use
@@ -31757,9 +31757,6 @@ function addTappletToRegistry(manifestVersion, packageName) {
     });
 }
 exports.addTappletToRegistry = addTappletToRegistry;
-// Usage example
-// addFieldToJsonFile('data.json', 'newField', 'newValue')
-addTappletToRegistry('0.0.2', 'tapp-example');
 
 
 /***/ }),
@@ -32005,6 +32002,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getTappletRegistry = exports.getTappletCandidate = exports.fetchTappletCandidateData = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const fs = __importStar(__nccwpck_require__(7147));
+const path = __importStar(__nccwpck_require__(1017));
 function fetchTappletCandidateData(tapplet) {
     const tappLogoPath = `src/registered-tapplets/${tapplet.packageName}/assets/logo.svg`;
     const tappRegistryUrl = `${tapplet.source.location.npm.registry}/${tapplet.packageName}/-/${tapplet.packageName}-${tapplet.version}.tgz`;
@@ -32030,16 +32028,18 @@ function fetchTappletCandidateData(tapplet) {
 }
 exports.fetchTappletCandidateData = fetchTappletCandidateData;
 function getTappletCandidate(packageName) {
-    const path = core.toPlatformPath(`./src/registered-tapplets/${packageName}/tapplet.manifest.json`);
-    core.notice(`tapplet manifest path ${path}`);
-    const tappData = fs.readFileSync(path, 'utf8');
+    const manifestPath = path.resolve('src', 'registered-tapplets', `${packageName}`, 'tapplet.manifest.json');
+    const platformPath = core.toPlatformPath(manifestPath);
+    core.notice(`Tapplet manifest platformPath: ${platformPath}`);
+    const tappData = fs.readFileSync(platformPath, 'utf8');
     return JSON.parse(tappData);
 }
 exports.getTappletCandidate = getTappletCandidate;
 function getTappletRegistry() {
-    const path = core.toPlatformPath('tapplets-registry.manifest.json');
-    core.notice(`./tapplet-registry manifest path ${path}`);
-    const tappData = fs.readFileSync(path, 'utf8');
+    const manifestPath = path.resolve('tapplets-registry.manifest.json');
+    const platformPath = core.toPlatformPath(manifestPath);
+    core.notice(`Tapplet registry manifest platformPath: ${platformPath}`);
+    const tappData = fs.readFileSync(platformPath, 'utf8');
     return JSON.parse(tappData);
 }
 exports.getTappletRegistry = getTappletRegistry;

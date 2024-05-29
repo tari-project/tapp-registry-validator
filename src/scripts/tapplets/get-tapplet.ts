@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import * as fs from 'fs'
+import * as path from 'path'
 import { SemVerVersion } from '@metamask/utils'
 import { TappletCandidate } from 'src/types/tapplet'
 import { RegisteredTapplet, TappletsRegistry } from 'src/types/tapp-registry'
@@ -33,17 +34,22 @@ export function fetchTappletCandidateData(
 }
 
 export function getTappletCandidate(packageName: string): TappletCandidate {
-  const path = core.toPlatformPath(
-    `./src/registered-tapplets/${packageName}/tapplet.manifest.json`
+  const manifestPath = path.resolve(
+    'src',
+    'registered-tapplets',
+    `${packageName}`,
+    'tapplet.manifest.json'
   )
-  core.notice(`Tapplet manifest path: ${path}`)
-  const tappData = fs.readFileSync(path, 'utf8')
+  const platformPath = core.toPlatformPath(manifestPath)
+  core.notice(`Tapplet manifest platformPath: ${platformPath}`)
+  const tappData = fs.readFileSync(platformPath, 'utf8')
   return JSON.parse(tappData)
 }
 
 export function getTappletRegistry(): TappletsRegistry {
-  const path = core.toPlatformPath('./tapplets-registry.manifest.json')
-  core.notice(`Tapplet registry manifest path: ${path}`)
-  const tappData = fs.readFileSync(path, 'utf8')
+  const manifestPath = path.resolve('tapplets-registry.manifest.json')
+  const platformPath = core.toPlatformPath(manifestPath)
+  core.notice(`Tapplet registry manifest platformPath: ${platformPath}`)
+  const tappData = fs.readFileSync(platformPath, 'utf8')
   return JSON.parse(tappData)
 }

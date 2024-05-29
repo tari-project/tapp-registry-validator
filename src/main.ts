@@ -7,11 +7,11 @@ import { addTappletToRegistry } from './registry'
  */
 export async function run(): Promise<void> {
   try {
-    const packageName: string = core.getInput('packageName')
+    const packageName: string = core.getInput('package-name')
     core.notice(`The ${packageName} tapplet registration process started...`)
 
     // Add new tapplet to the registry
-    const ver: string = core.getInput('manifestVersion')
+    const ver: string = core.getInput('manifest-version')
     addTappletToRegistry(ver, packageName)
     core.info('Registry updated.')
 

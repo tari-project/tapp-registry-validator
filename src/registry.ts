@@ -70,7 +70,3 @@ export function addTappletToRegistry(
     return true
   })
 }
-
-// Usage example
-// addFieldToJsonFile('data.json', 'newField', 'newValue')
-addTappletToRegistry('0.0.2', 'tapp-example')
