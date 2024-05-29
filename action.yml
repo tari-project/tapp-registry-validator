@@ -23,9 +23,4 @@ outputs:
 
 runs:
   using: node20
-  run: node ${{ github.action_path }}/dist/index.js
-  with:
-    package-name: ${{ github.event.inputs.package-name }}
-    manifest-version: ${{ github.event.inputs.manifest-ersion }}
-  env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  main: './dist/index.js'
