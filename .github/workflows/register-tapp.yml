@@ -41,8 +41,8 @@ jobs:
         id: add-tapp
         uses: ./
         with:
-          package-name: ${{ github.event.inputs.package-name }}
-          manifest-version: ${{ github.event.inputs.manifest-ersion }}
+          package-name: ${{ inputs.package-name }}
+          manifest-version: ${{ inputs.manifest-ersion }}
 
       - name: Print Output
         id: status
