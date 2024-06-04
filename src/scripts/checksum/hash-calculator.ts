@@ -30,7 +30,7 @@ function calculateHash(data: Buffer, sha: number): string {
   }
 }
 
-function readData(filePath: string, sha: number): Promise<string> {
+async function readData(filePath: string, sha: number): Promise<string> {
   return new Promise((resolve, reject) => {
     if (fs.lstatSync(filePath).isDirectory()) {
       fs.readdir(filePath, (err, files) => {
@@ -79,18 +79,14 @@ function decodeHex(s: string): Buffer {
 export async function getTappChecksum(
   tappletPath: string,
   tappletName: string,
-  sha: number = 512
+  sha = 512
 ): Promise<string> {
   const filePath = path.join(tappletPath, `${tappletName}.tar.gz`)
 
-  try {
-    const shasumOutput = await readData(filePath, sha)
-    const decodedShasum = decodeHex(shasumOutput)
-    const convertedShasum = base64.fromByteArray(decodedShasum)
+  const shasumOutput = await readData(filePath, sha)
+  const decodedShasum = decodeHex(shasumOutput)
+  const convertedShasum = base64.fromByteArray(decodedShasum)
 
-    const calculatedIntegrity = `sha512-${convertedShasum.replace(/\n/g, '')}`
-    return calculatedIntegrity
-  } catch (err) {
-    throw err
-  }
+  const calculatedIntegrity = `sha${sha}-${convertedShasum.replace(/\n/g, '')}`
+  return calculatedIntegrity
 }

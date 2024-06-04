@@ -41,8 +41,10 @@ export function addTappletToRegistry(
   const registry: TappletsRegistry = getTappletRegistry()
 
   //TODO fill all fileds
-  const tappletToRegister: RegisteredTapplet =
-    fetchTappletCandidateData(tapplet, checksum)
+  const tappletToRegister: RegisteredTapplet = fetchTappletCandidateData(
+    tapplet,
+    checksum
+  )
 
   //TODO
   // if (checksum !== tapplet.manifestVersion)

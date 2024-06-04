@@ -9,9 +9,7 @@
           "name": "karczuRF",
           "website": "https://github.com/karczuRF"
         },
-        "codeowners": [
-          "karczuRF"
-        ],
+        "codeowners": ["karczuRF"],
         "audits": [],
         "category": "test",
         "logoPath": "src/registered-tapplets/tapp-example/assets/logo.svg"
