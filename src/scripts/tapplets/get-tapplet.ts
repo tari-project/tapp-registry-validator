@@ -6,7 +6,8 @@ import { TappletCandidate } from 'src/types/tapplet'
 import { RegisteredTapplet, TappletsRegistry } from 'src/types/tapp-registry'
 
 export function fetchTappletCandidateData(
-  tapplet: TappletCandidate
+  tapplet: TappletCandidate,
+  checksum: string
 ): RegisteredTapplet {
   const tappLogoPath = `src/registered-tapplets/${tapplet.packageName}/assets/logo.svg`
   const tappRegistryUrl = `${tapplet.source.location.npm.registry}/${tapplet.packageName}/-/${tapplet.packageName}-${tapplet.version}.tgz`
@@ -24,7 +25,7 @@ export function fetchTappletCandidateData(
     versions: {
       [tapplet.version as SemVerVersion]: {
         //TODO calculate/check integrity
-        integrity: 'sha512-test123test123test123==',
+        integrity: checksum,
         registryUrl: tappRegistryUrl
       }
     }
@@ -38,10 +39,11 @@ export function getTappletCandidate(packageName: string): TappletCandidate {
 
   const manifestPath = path.resolve(
     'src',
-    'registered-tapplets',
+    'tapplet-candidate',
     `${packageName}`,
     'tapplet.manifest.json'
   )
+
   const platformPath = core.toPlatformPath(manifestPath)
   core.notice(`Tapplet manifest dir: ${jsonDir}`)
   core.notice(`Tapplet manifest platformPath: ${platformPath}`)

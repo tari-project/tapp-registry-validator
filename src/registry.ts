@@ -31,7 +31,8 @@ export function updateRegisteredTapplet(
 
 export function addTappletToRegistry(
   manifestVersion: string,
-  packageName: string
+  packageName: string,
+  checksum: string
 ): void {
   // Read the content of the tapplet manifest to be registered
   const tapplet: TappletCandidate = getTappletCandidate(packageName)
@@ -41,8 +42,13 @@ export function addTappletToRegistry(
 
   //TODO fill all fileds
   const tappletToRegister: RegisteredTapplet =
-    fetchTappletCandidateData(tapplet)
+    fetchTappletCandidateData(tapplet, checksum)
 
+  //TODO
+  // if (checksum !== tapplet.manifestVersion)
+  //   throw new Error(
+  //     `Invalid Snap manifest: manifest shasum does not match computed shasum. ${checksum}`
+  //   )
   // Add the new field to the JSON data
   updateRegisteredTapplet(registry, tappletToRegister, tapplet.version)
 

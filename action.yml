@@ -11,6 +11,9 @@ inputs:
     description: 'Tapplet package name'
     required: true
     default: 'tapplet-example'
+  package-url:
+    description: 'Tapplet package https url'
+    required: true
   manifest-version:
     description: 'Next version number'
     required: true
