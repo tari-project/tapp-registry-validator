@@ -3,6 +3,7 @@ import path from 'path'
 import axios, { AxiosError, AxiosResponse } from 'axios'
 import * as zlib from 'zlib'
 import * as tar from 'tar'
+import { TappletCandidate } from 'src/types/tapplet'
 
 interface DownloadError {
   type: 'request' | 'io'
@@ -13,14 +14,13 @@ interface FailedToDownload extends DownloadError {
   url: string
 }
 
-export async function downloadFile(
-  url: string,
-  tappletPath: string,
-  tappletName: string
-): Promise<void> {
+export async function downloadFile(tapplet: TappletCandidate): Promise<void> {
+  const tappletPath = `src/${tapplet.packageName}`
+  const url = `${tapplet.source.location.npm.registry}/${tapplet.packageName}/-/${tapplet.packageName}-${tapplet.version}.tgz`
+
   console.log('Downloading in progress...! Url:', url)
   const client = axios.create()
-  const filePath = path.join(tappletPath, `${tappletName}.tar.gz`)
+  const filePath = path.join(tappletPath, `${tapplet.packageName}.tar.gz`)
   try {
     const response: AxiosResponse = await client.get(url, {
       responseType: 'arraybuffer' // Set responseType to 'arraybuffer' to download as a binary file
@@ -56,11 +56,9 @@ export async function downloadFile(
   }
 }
 
-export async function extractTarball(
-  tappletPath: string,
-  tappletName: string
-): Promise<void> {
+export async function extractTarball(tappletName: string): Promise<void> {
   try {
+    const tappletPath = `src/${tappletName}`
     const filePath = path.join(tappletPath, `${tappletName}.tar.gz`)
 
     const outputDir = await fs.promises.mkdir(

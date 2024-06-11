@@ -7,10 +7,10 @@ import { RegisteredTapplet, TappletsRegistry } from 'src/types/tapp-registry'
 
 export function fetchTappletCandidateData(
   tapplet: TappletCandidate,
-  checksum: string
+  integrity: string
 ): RegisteredTapplet {
-  const tappLogoPath = `src/registered-tapplets/${tapplet.packageName}/assets/logo.svg`
-  const tappRegistryUrl = `${tapplet.source.location.npm.registry}/${tapplet.packageName}/-/${tapplet.packageName}-${tapplet.version}.tgz`
+  const tappLogoPath = `src/${tapplet.packageName}/assets/logo.svg`
+  const registryUrl = `${tapplet.source.location.npm.registry}/${tapplet.packageName}/-/${tapplet.packageName}-${tapplet.version}.tgz`
 
   const tappletToRegister: RegisteredTapplet = {
     id: tapplet.packageName,
@@ -24,13 +24,12 @@ export function fetchTappletCandidateData(
     },
     versions: {
       [tapplet.version as SemVerVersion]: {
-        //TODO calculate/check integrity
-        integrity: checksum,
-        registryUrl: tappRegistryUrl
+        integrity,
+        registryUrl
       }
     }
   }
-
+  core.notice(`Tapplet data fetched: ${registryUrl}`)
   return tappletToRegister
 }
 
@@ -39,7 +38,6 @@ export function getTappletCandidate(packageName: string): TappletCandidate {
 
   const manifestPath = path.resolve(
     'src',
-    'tapplet-candidate',
     `${packageName}`,
     'tapplet.manifest.json'
   )

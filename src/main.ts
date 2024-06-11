@@ -1,11 +1,10 @@
 import * as core from '@actions/core'
 import { addTappletToRegistry } from './registry'
-import { getTappChecksum } from './scripts/checksum/hash-calculator'
+import { getTappIntegrity } from './scripts/checksum/hash-calculator'
 import {
   downloadFile,
   extractTarball
 } from './scripts/checksum/tapplet-installer'
-import path from 'path'
 
 /**
  * The main function for the action.
@@ -14,19 +13,18 @@ import path from 'path'
 export async function run(): Promise<void> {
   try {
     const packageName: string = core.getInput('package-name')
-    core.notice(`The ${packageName} tapplet registration process started...`)
-    const url: string = core.getInput('package-url')
+    // core.notice(`The ${packageName} tapplet registration process started...`)
+    // const url: string = core.getInput('package-url')
+    // const downloadPath = path.resolve('src', 'tapplet-candidate')
 
-    const downloadPath = path.resolve('src', 'tapplet-candidate')
-
-    await downloadFile(url, downloadPath, packageName)
     // Validate checksum
-    const sha = await getTappChecksum(downloadPath, packageName)
-    await extractTarball(downloadPath, packageName)
+    const integrity = await getTappIntegrity(packageName)
 
     // Add new tapplet to the registry
-    const ver: string = core.getInput('manifest-version')
-    addTappletToRegistry(ver, packageName, sha)
+    const tapplet = addTappletToRegistry(packageName, integrity)
+
+    await downloadFile(tapplet)
+    await extractTarball(packageName)
 
     // Set outputs for other workflow steps to use
     core.setOutput('status', true)

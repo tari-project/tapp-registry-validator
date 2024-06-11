@@ -34507,16 +34507,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const registry_1 = __nccwpck_require__(2113);
 const hash_calculator_1 = __nccwpck_require__(6321);
 const tapplet_installer_1 = __nccwpck_require__(2936);
-const path_1 = __importDefault(__nccwpck_require__(1017));
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -34524,16 +34520,15 @@ const path_1 = __importDefault(__nccwpck_require__(1017));
 async function run() {
     try {
         const packageName = core.getInput('package-name');
-        core.notice(`The ${packageName} tapplet registration process started...`);
-        const url = core.getInput('package-url');
-        const downloadPath = path_1.default.resolve('src', 'tapplet-candidate');
-        await (0, tapplet_installer_1.downloadFile)(url, downloadPath, packageName);
+        // core.notice(`The ${packageName} tapplet registration process started...`)
+        // const url: string = core.getInput('package-url')
+        // const downloadPath = path.resolve('src', 'tapplet-candidate')
         // Validate checksum
-        const sha = await (0, hash_calculator_1.getTappChecksum)(downloadPath, packageName);
-        await (0, tapplet_installer_1.extractTarball)(downloadPath, packageName);
+        const integrity = await (0, hash_calculator_1.getTappIntegrity)(packageName);
         // Add new tapplet to the registry
-        const ver = core.getInput('manifest-version');
-        (0, registry_1.addTappletToRegistry)(ver, packageName, sha);
+        const tapplet = (0, registry_1.addTappletToRegistry)(packageName, integrity);
+        await (0, tapplet_installer_1.downloadFile)(tapplet);
+        await (0, tapplet_installer_1.extractTarball)(packageName);
         // Set outputs for other workflow steps to use
         core.setOutput('status', true);
     }
@@ -34574,13 +34569,13 @@ function updateRegisteredTapplet(registry, tappletToRegister, tappletVersion) {
     }
 }
 exports.updateRegisteredTapplet = updateRegisteredTapplet;
-function addTappletToRegistry(manifestVersion, packageName, checksum) {
+function addTappletToRegistry(packageName, integrity) {
     // Read the content of the tapplet manifest to be registered
     const tapplet = (0, get_tapplet_1.getTappletCandidate)(packageName);
     // Read the content of the current registry JSON file
     const registry = (0, get_tapplet_1.getTappletRegistry)();
     //TODO fill all fileds
-    const tappletToRegister = (0, get_tapplet_1.fetchTappletCandidateData)(tapplet, checksum);
+    const tappletToRegister = (0, get_tapplet_1.fetchTappletCandidateData)(tapplet, integrity);
     //TODO
     // if (checksum !== tapplet.manifestVersion)
     //   throw new Error(
@@ -34589,22 +34584,21 @@ function addTappletToRegistry(manifestVersion, packageName, checksum) {
     // Add the new field to the JSON data
     updateRegisteredTapplet(registry, tappletToRegister, tapplet.version);
     // increment version
-    // const parts = registry.manifestVersion.split('.')
-    // const major = parseInt(parts[0])
-    // const minor = parseInt(parts[1])
-    // let patch = parseInt(parts[2])
-    // patch = ++patch // Increment the major version
-    // registry.manifestVersion = `${major.toString()}.${minor.toString()}.${patch.toString()}`
-    registry.manifestVersion = manifestVersion;
+    const parts = registry.manifestVersion.split('.');
+    const major = parseInt(parts[0]);
+    const minor = parseInt(parts[1]);
+    let patch = parseInt(parts[2]);
+    patch = ++patch; // Increment the major version
+    registry.manifestVersion = `${major.toString()}.${minor.toString()}.${patch.toString()}`;
     console.log('manifestVersion: ', registry.manifestVersion);
     const jsonData = JSON.stringify(registry, null, 2);
     (0, codeowners_1.addAndFormatCodeowners)(tapplet.packageName, tapplet.repository.codeowners);
-    return (0, fs_1.writeFile)('tapplets-registry.manifest.json', jsonData, err => {
+    (0, fs_1.writeFile)('tapplets-registry.manifest.json', jsonData, err => {
         if (err) {
             throw new Error(`Error writing file: ${err.message} (file: tapplets-registry.manifest.json, data: ${jsonData})`);
         }
-        return true;
     });
+    return tapplet;
 }
 exports.addTappletToRegistry = addTappletToRegistry;
 
@@ -34640,7 +34634,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getTappChecksum = void 0;
+exports.getTappIntegrity = void 0;
 const fs = __importStar(__nccwpck_require__(7147));
 const path = __importStar(__nccwpck_require__(1017));
 const crypto = __importStar(__nccwpck_require__(6113));
@@ -34714,7 +34708,8 @@ function decodeHex(s) {
     }
     return buffer;
 }
-async function getTappChecksum(tappletPath, tappletName, sha = 512) {
+async function getTappIntegrity(tappletName, sha = 512) {
+    const tappletPath = `src/${tappletName}`;
     const filePath = path.join(tappletPath, `${tappletName}.tar.gz`);
     const shasumOutput = await readData(filePath, sha);
     const decodedShasum = decodeHex(shasumOutput);
@@ -34722,7 +34717,7 @@ async function getTappChecksum(tappletPath, tappletName, sha = 512) {
     const calculatedIntegrity = `sha${sha}-${convertedShasum.replace(/\n/g, '')}`;
     return calculatedIntegrity;
 }
-exports.getTappChecksum = getTappChecksum;
+exports.getTappIntegrity = getTappIntegrity;
 
 
 /***/ }),
@@ -34765,10 +34760,12 @@ const path_1 = __importDefault(__nccwpck_require__(1017));
 const axios_1 = __importStar(__nccwpck_require__(8757));
 const zlib = __importStar(__nccwpck_require__(9796));
 const tar = __importStar(__nccwpck_require__(6630));
-async function downloadFile(url, tappletPath, tappletName) {
+async function downloadFile(tapplet) {
+    const tappletPath = `src/${tapplet.packageName}`;
+    const url = `${tapplet.source.location.npm.registry}/${tapplet.packageName}/-/${tapplet.packageName}-${tapplet.version}.tgz`;
     console.log('Downloading in progress...! Url:', url);
     const client = axios_1.default.create();
-    const filePath = path_1.default.join(tappletPath, `${tappletName}.tar.gz`);
+    const filePath = path_1.default.join(tappletPath, `${tapplet.packageName}.tar.gz`);
     try {
         const response = await client.get(url, {
             responseType: 'arraybuffer' // Set responseType to 'arraybuffer' to download as a binary file
@@ -34806,8 +34803,9 @@ async function downloadFile(url, tappletPath, tappletName) {
     }
 }
 exports.downloadFile = downloadFile;
-async function extractTarball(tappletPath, tappletName) {
+async function extractTarball(tappletName) {
     try {
+        const tappletPath = `src/${tappletName}`;
         const filePath = path_1.default.join(tappletPath, `${tappletName}.tar.gz`);
         const outputDir = await fs_1.default.promises.mkdir(path_1.default.join(tappletPath, tappletName), {
             recursive: true
@@ -35091,9 +35089,9 @@ exports.getTappletRegistry = exports.getTappletCandidate = exports.fetchTappletC
 const core = __importStar(__nccwpck_require__(2186));
 const fs = __importStar(__nccwpck_require__(7147));
 const path = __importStar(__nccwpck_require__(1017));
-function fetchTappletCandidateData(tapplet, checksum) {
-    const tappLogoPath = `src/registered-tapplets/${tapplet.packageName}/assets/logo.svg`;
-    const tappRegistryUrl = `${tapplet.source.location.npm.registry}/${tapplet.packageName}/-/${tapplet.packageName}-${tapplet.version}.tgz`;
+function fetchTappletCandidateData(tapplet, integrity) {
+    const tappLogoPath = `src/${tapplet.packageName}/assets/logo.svg`;
+    const registryUrl = `${tapplet.source.location.npm.registry}/${tapplet.packageName}/-/${tapplet.packageName}-${tapplet.version}.tgz`;
     const tappletToRegister = {
         id: tapplet.packageName,
         metadata: {
@@ -35106,18 +35104,18 @@ function fetchTappletCandidateData(tapplet, checksum) {
         },
         versions: {
             [tapplet.version]: {
-                //TODO calculate/check integrity
-                integrity: checksum,
-                registryUrl: tappRegistryUrl
+                integrity,
+                registryUrl
             }
         }
     };
+    core.notice(`Tapplet data fetched: ${registryUrl}`);
     return tappletToRegister;
 }
 exports.fetchTappletCandidateData = fetchTappletCandidateData;
 function getTappletCandidate(packageName) {
     const jsonDir = core.getInput('dir');
-    const manifestPath = path.resolve('src', 'tapplet-candidate', `${packageName}`, 'tapplet.manifest.json');
+    const manifestPath = path.resolve('src', `${packageName}`, 'tapplet.manifest.json');
     const platformPath = core.toPlatformPath(manifestPath);
     core.notice(`Tapplet manifest dir: ${jsonDir}`);
     core.notice(`Tapplet manifest platformPath: ${platformPath}`);

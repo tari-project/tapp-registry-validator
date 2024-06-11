@@ -30,10 +30,9 @@ export function updateRegisteredTapplet(
 }
 
 export function addTappletToRegistry(
-  manifestVersion: string,
   packageName: string,
-  checksum: string
-): void {
+  integrity: string
+): TappletCandidate {
   // Read the content of the tapplet manifest to be registered
   const tapplet: TappletCandidate = getTappletCandidate(packageName)
 
@@ -43,7 +42,7 @@ export function addTappletToRegistry(
   //TODO fill all fileds
   const tappletToRegister: RegisteredTapplet = fetchTappletCandidateData(
     tapplet,
-    checksum
+    integrity
   )
 
   //TODO
@@ -55,26 +54,26 @@ export function addTappletToRegistry(
   updateRegisteredTapplet(registry, tappletToRegister, tapplet.version)
 
   // increment version
-  // const parts = registry.manifestVersion.split('.')
-  // const major = parseInt(parts[0])
-  // const minor = parseInt(parts[1])
-  // let patch = parseInt(parts[2])
-  // patch = ++patch // Increment the major version
-  // registry.manifestVersion = `${major.toString()}.${minor.toString()}.${patch.toString()}`
+  const parts = registry.manifestVersion.split('.')
+  const major = parseInt(parts[0])
+  const minor = parseInt(parts[1])
+  let patch = parseInt(parts[2])
+  patch = ++patch // Increment the major version
+  registry.manifestVersion = `${major.toString()}.${minor.toString()}.${patch.toString()}`
 
-  registry.manifestVersion = manifestVersion
   console.log('manifestVersion: ', registry.manifestVersion)
 
   const jsonData = JSON.stringify(registry, null, 2)
 
   addAndFormatCodeowners(tapplet.packageName, tapplet.repository.codeowners)
 
-  return writeFile('tapplets-registry.manifest.json', jsonData, err => {
+  writeFile('tapplets-registry.manifest.json', jsonData, err => {
     if (err) {
       throw new Error(
         `Error writing file: ${err.message} (file: tapplets-registry.manifest.json, data: ${jsonData})`
       )
     }
-    return true
   })
+
+  return tapplet
 }

@@ -10,17 +10,6 @@ inputs:
   package-name:
     description: 'Tapplet package name'
     required: true
-    default: 'tapplet-example'
-  package-url:
-    description: 'Tapplet package https url'
-    required: true
-  manifest-version:
-    description: 'Next version number'
-    required: true
-    default: '1.0.0'
-  dir:
-    description: 'Optional subfolder directory to save the json file. | src/ '
-    required: false
 
 # Define your outputs here.
 outputs:
