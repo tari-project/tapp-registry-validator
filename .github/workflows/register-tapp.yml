@@ -5,15 +5,12 @@ on:
     inputs:
       packageName:
         description: 'Tapplet package name'
-        required: false
-        default: 'tapplet-example'
-      package-url:
-        description: 'Tapplet package https url'
         required: true
-      manifestVersion:
-        description: version
-        default: '1.0.0'
-        required: false
+        default: 'tapplet-example'
+
+  push:
+    branches:
+      - main
 
 permissions:
   actions: write

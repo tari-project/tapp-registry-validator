@@ -34527,8 +34527,7 @@ async function run() {
         const integrity = await (0, hash_calculator_1.getTappIntegrity)(packageName);
         // Add new tapplet to the registry
         const tapplet = (0, registry_1.addTappletToRegistry)(packageName, integrity);
-        await (0, tapplet_installer_1.downloadFile)(tapplet);
-        await (0, tapplet_installer_1.extractTarball)(packageName);
+        await (0, tapplet_installer_1.downloadAndExtractPackage)(tapplet);
         // Set outputs for other workflow steps to use
         core.setOutput('status', true);
     }
@@ -34754,18 +34753,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.extractTarball = exports.downloadFile = void 0;
+exports.downloadAndExtractPackage = exports.extractTarball = exports.downloadFile = void 0;
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const axios_1 = __importStar(__nccwpck_require__(8757));
 const zlib = __importStar(__nccwpck_require__(9796));
 const tar = __importStar(__nccwpck_require__(6630));
-async function downloadFile(tapplet) {
-    const tappletPath = `src/${tapplet.packageName}`;
-    const url = `${tapplet.source.location.npm.registry}/${tapplet.packageName}/-/${tapplet.packageName}-${tapplet.version}.tgz`;
+async function downloadFile(tappletPath, filePath, url) {
     console.log('Downloading in progress...! Url:', url);
     const client = axios_1.default.create();
-    const filePath = path_1.default.join(tappletPath, `${tapplet.packageName}.tar.gz`);
     try {
         const response = await client.get(url, {
             responseType: 'arraybuffer' // Set responseType to 'arraybuffer' to download as a binary file
@@ -34803,11 +34799,9 @@ async function downloadFile(tapplet) {
     }
 }
 exports.downloadFile = downloadFile;
-async function extractTarball(tappletName) {
+async function extractTarball(tappletPath, filePath) {
     try {
-        const tappletPath = `src/${tappletName}`;
-        const filePath = path_1.default.join(tappletPath, `${tappletName}.tar.gz`);
-        const outputDir = await fs_1.default.promises.mkdir(path_1.default.join(tappletPath, tappletName), {
+        const outputDir = await fs_1.default.promises.mkdir(path_1.default.join(tappletPath, 'package'), {
             recursive: true
         });
         const gunzip = zlib.createGunzip({});
@@ -34843,6 +34837,14 @@ async function extractTarball(tappletName) {
     }
 }
 exports.extractTarball = extractTarball;
+async function downloadAndExtractPackage(tapplet) {
+    const tappletPath = `src/${tapplet.packageName}`;
+    const filePath = path_1.default.join(tappletPath, `${tapplet.packageName}.tar.gz`);
+    const url = `${tapplet.source.location.npm.registry}/${tapplet.packageName}/-/${tapplet.packageName}-${tapplet.version}.tgz`;
+    await downloadFile(tappletPath, filePath, url);
+    await extractTarball(tappletPath, filePath);
+}
+exports.downloadAndExtractPackage = downloadAndExtractPackage;
 
 
 /***/ }),
