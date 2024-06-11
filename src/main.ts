@@ -1,10 +1,7 @@
 import * as core from '@actions/core'
 import { addTappletToRegistry } from './registry'
 import { getTappIntegrity } from './scripts/checksum/hash-calculator'
-import {
-  downloadFile,
-  extractTarball
-} from './scripts/checksum/tapplet-installer'
+import { downloadAndExtractPackage } from './scripts/checksum/tapplet-installer'
 
 /**
  * The main function for the action.
@@ -23,8 +20,7 @@ export async function run(): Promise<void> {
     // Add new tapplet to the registry
     const tapplet = addTappletToRegistry(packageName, integrity)
 
-    await downloadFile(tapplet)
-    await extractTarball(packageName)
+    await downloadAndExtractPackage(tapplet)
 
     // Set outputs for other workflow steps to use
     core.setOutput('status', true)

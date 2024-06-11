@@ -14,13 +14,14 @@ interface FailedToDownload extends DownloadError {
   url: string
 }
 
-export async function downloadFile(tapplet: TappletCandidate): Promise<void> {
-  const tappletPath = `src/${tapplet.packageName}`
-  const url = `${tapplet.source.location.npm.registry}/${tapplet.packageName}/-/${tapplet.packageName}-${tapplet.version}.tgz`
-
+export async function downloadFile(
+  tappletPath: string,
+  filePath: string,
+  url: string
+): Promise<void> {
   console.log('Downloading in progress...! Url:', url)
   const client = axios.create()
-  const filePath = path.join(tappletPath, `${tapplet.packageName}.tar.gz`)
+
   try {
     const response: AxiosResponse = await client.get(url, {
       responseType: 'arraybuffer' // Set responseType to 'arraybuffer' to download as a binary file
@@ -56,13 +57,13 @@ export async function downloadFile(tapplet: TappletCandidate): Promise<void> {
   }
 }
 
-export async function extractTarball(tappletName: string): Promise<void> {
+export async function extractTarball(
+  tappletPath: string,
+  filePath: string
+): Promise<void> {
   try {
-    const tappletPath = `src/${tappletName}`
-    const filePath = path.join(tappletPath, `${tappletName}.tar.gz`)
-
     const outputDir = await fs.promises.mkdir(
-      path.join(tappletPath, tappletName),
+      path.join(tappletPath, 'package'),
       {
         recursive: true
       }
@@ -100,4 +101,15 @@ export async function extractTarball(tappletName: string): Promise<void> {
   } catch (err) {
     console.error(`Error extracting tarball: ${err}`)
   }
+}
+
+export async function downloadAndExtractPackage(
+  tapplet: TappletCandidate
+): Promise<void> {
+  const tappletPath = `src/${tapplet.packageName}`
+  const filePath = path.join(tappletPath, `${tapplet.packageName}.tar.gz`)
+  const url = `${tapplet.source.location.npm.registry}/${tapplet.packageName}/-/${tapplet.packageName}-${tapplet.version}.tgz`
+
+  await downloadFile(tappletPath, filePath, url)
+  await extractTarball(tappletPath, filePath)
 }
