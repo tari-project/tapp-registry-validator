@@ -18,4 +18,16 @@ outputs:
 
 runs:
   using: node20
-  main: './dist/index.js'
+  steps:
+    - id: update-registry
+      shell: bash
+      run: node ${{ github.action_path }}/dist/index.js
+
+    - id: add-updated-manifest
+      shell: bash
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add .
+        git commit -m "Register the tapplet"
+        git push
