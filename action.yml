@@ -22,7 +22,7 @@ runs:
   steps:
     - id: update-registry
       shell: bash
-      run: node ${{ github.action_path }}/dist/index.js
+      run: node ./dist/index.js
     - id: add-updated-manifest
       shell: bash
       run: |
