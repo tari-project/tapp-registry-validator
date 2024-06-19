@@ -17,12 +17,11 @@ outputs:
     description: 'Status of tapplet registration process'
 
 runs:
-  using: node20
+  using: composite
   steps:
     - id: update-registry
       shell: bash
       run: node ${{ github.action_path }}/dist/index.js
-
     - id: add-updated-manifest
       shell: bash
       run: |
