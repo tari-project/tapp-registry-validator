@@ -4,6 +4,7 @@ import axios, { AxiosError, AxiosResponse } from 'axios'
 import * as zlib from 'zlib'
 import * as tar from 'tar'
 import { TappletCandidate } from 'src/types/tapplet'
+import { getTappletCandidate } from '../tapplets/get-tapplet'
 
 interface DownloadError {
   type: 'request' | 'io'
@@ -104,12 +105,18 @@ export async function extractTarball(
 }
 
 export async function downloadAndExtractPackage(
-  tapplet: TappletCandidate
-): Promise<void> {
+  packageName: string
+): Promise<TappletCandidate> {
+  // Read the content of the tapplet manifest to be registered
+  const tapplet: TappletCandidate = getTappletCandidate(packageName)
+
   const tappletPath = `src/${tapplet.packageName}`
   const filePath = path.join(tappletPath, `${tapplet.packageName}.tar.gz`)
+  // TODO add url to tapp manifest
   const url = `${tapplet.source.location.npm.registry}/${tapplet.packageName}/-/${tapplet.packageName}-${tapplet.version}.tgz`
 
   await downloadFile(tappletPath, filePath, url)
   await extractTarball(tappletPath, filePath)
+
+  return tapplet
 }

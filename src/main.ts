@@ -10,17 +10,23 @@ import { downloadAndExtractPackage } from './scripts/checksum/tapplet-installer'
 export async function run(): Promise<void> {
   try {
     const packageName: string = core.getInput('package-name')
-    // core.notice(`The ${packageName} tapplet registration process started...`)
+    core.notice(`The ${packageName} tapplet registration process started...`)
     // const url: string = core.getInput('package-url')
     // const downloadPath = path.resolve('src', 'tapplet-candidate')
 
+    // Download the tapplet package and extract to verify the content
+    const tappletCandidate = await downloadAndExtractPackage(packageName)
+    core.notice(`The ${tappletCandidate.displayName} tapplet extracted`)
+
     // Validate checksum
-    const integrity = await getTappIntegrity(packageName)
+    // const integrity = await getTappIntegrity(packageName)
+    // core.notice(
+    //   `The ${tappletCandidate.displayName} tapplet integrity: ${integrity}`
+    // )
 
     // Add new tapplet to the registry
-    const tapplet = addTappletToRegistry(packageName, integrity)
-
-    await downloadAndExtractPackage(tapplet)
+    await addTappletToRegistry(tappletCandidate)
+    core.notice(`The ${tappletCandidate.displayName} tapplet added to registry`)
 
     // Set outputs for other workflow steps to use
     core.setOutput('status', true)
