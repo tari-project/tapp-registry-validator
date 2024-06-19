@@ -9,6 +9,7 @@ branding:
 inputs:
   package-name:
     description: 'Tapplet package name'
+    default: 'tapp-example'
     required: true
 
 # Define your outputs here.
