@@ -21,8 +21,8 @@ runs:
   using: composite
   steps:
     - id: update-registry
-      shell: bash
-      run: node ./dist/index.js
+      uses: ./
+    # add updated files
     - id: add-updated-manifest
       shell: bash
       run: |
