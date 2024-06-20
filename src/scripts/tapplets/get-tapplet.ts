@@ -36,19 +36,9 @@ export function fetchTappletCandidateData(
   return tappletToRegister
 }
 
-export function getTappletCandidate(packageName: string): TappletCandidate {
-  const jsonDir = core.getInput('dir')
-
-  const manifestPath = path.resolve(
-    'src',
-    `${packageName}`,
-    'tapplet.manifest.json'
-  )
-
-  const platformPath = core.toPlatformPath(manifestPath)
-  core.notice(`Tapplet manifest dir: ${jsonDir}`)
-  core.notice(`Tapplet manifest platformPath: ${platformPath}`)
-  const tappData = fs.readFileSync(platformPath, 'utf8')
+export function getTappletCandidate(manifestPath: string): TappletCandidate {
+  core.notice(`Tapplet manifest platformPath: ${manifestPath}`)
+  const tappData = fs.readFileSync(manifestPath, 'utf8')
   return JSON.parse(tappData)
 }
 

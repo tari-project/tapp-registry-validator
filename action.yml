@@ -9,6 +9,10 @@ inputs:
   package-name:
     description: 'The tapplet package name'
     required: true
+  package-version:
+    description: 'The tapplet package version'
+    required: true
+    default: '1.0.0'
 
 outputs:
   status:

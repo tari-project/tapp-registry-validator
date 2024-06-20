@@ -5,7 +5,7 @@ import * as zlib from 'zlib'
 import * as tar from 'tar'
 import { TappletCandidate } from 'src/types/tapplet'
 import { getTappletCandidate } from '../tapplets/get-tapplet'
-import { SRC_DIR } from 'src/constants'
+import { MANIFEST_FILE, SRC_DIR } from 'src/constants'
 import { getFileIntegrity } from './hash-calculator'
 
 interface DownloadError {
@@ -105,23 +105,28 @@ export async function extractTarball(
 }
 
 export async function downloadAndExtractPackage(
-  packageName: string
+  packageName: string,
+  packageVersion: string
 ): Promise<TappletCandidate> {
-  // Read the content of the tapplet manifest to be registered
-  const tapplet: TappletCandidate = getTappletCandidate(packageName)
+  const folderPath = path.join(SRC_DIR, packageName, packageVersion)
+  const manifestPath = path.join(folderPath, MANIFEST_FILE)
+  const tarballPath = path.join(folderPath, `${packageName}.tar.gz`)
 
-  const folderPath = path.join(SRC_DIR, tapplet.packageName, tapplet.version)
-  const filePath = path.join(folderPath, `${tapplet.packageName}.tar.gz`)
+  console.log('tapplet manifest', manifestPath)
+  console.log('tapplet tarball', tarballPath)
+
+  // Read the content of the tapplet manifest to be registered
+  const tapplet: TappletCandidate = getTappletCandidate(manifestPath)
 
   await downloadFile(
     folderPath,
-    filePath,
+    tarballPath,
     tapplet.source.location.npm.distTarball
   )
-  await extractTarball(folderPath, filePath)
+  await extractTarball(folderPath, tarballPath)
 
   // Validate checksum
-  const calculatedIntegrity = await getFileIntegrity(filePath)
+  const calculatedIntegrity = await getFileIntegrity(tarballPath)
   if (calculatedIntegrity !== tapplet.source.location.npm.integrity)
     throw new Error(
       `The integrity mismatch! Calculated (${calculatedIntegrity}) is different from the registry value (${tapplet.source.location.npm.integrity})`

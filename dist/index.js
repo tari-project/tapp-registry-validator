@@ -34536,11 +34536,12 @@ const tapplet_installer_1 = __nccwpck_require__(2936);
 async function run() {
     try {
         const packageName = core.getInput('package-name');
+        const packageVersion = core.getInput('version');
         core.notice(`The ${packageName} tapplet registration process started...`);
         // const url: string = core.getInput('package-url')
         // const downloadPath = path.resolve('src', 'tapplet-candidate')
         // Download the tapplet package and extract to verify the content
-        const tappletCandidate = await (0, tapplet_installer_1.downloadAndExtractPackage)(packageName);
+        const tappletCandidate = await (0, tapplet_installer_1.downloadAndExtractPackage)(packageName, packageVersion);
         core.notice(`The ${tappletCandidate.displayName} tapplet extracted`);
         // Add new tapplet to the registry
         await (0, registry_1.addTappletToRegistry)(tappletCandidate);
@@ -34872,15 +34873,18 @@ async function extractTarball(folderPath, filePath) {
     }
 }
 exports.extractTarball = extractTarball;
-async function downloadAndExtractPackage(packageName) {
+async function downloadAndExtractPackage(packageName, packageVersion) {
+    const folderPath = path_1.default.join(constants_1.SRC_DIR, packageName, packageVersion);
+    const manifestPath = path_1.default.join(folderPath, constants_1.MANIFEST_FILE);
+    const tarballPath = path_1.default.join(folderPath, `${packageName}.tar.gz`);
+    console.log('tapplet manifest', manifestPath);
+    console.log('tapplet tarball', tarballPath);
     // Read the content of the tapplet manifest to be registered
-    const tapplet = (0, get_tapplet_1.getTappletCandidate)(packageName);
-    const folderPath = path_1.default.join(constants_1.SRC_DIR, tapplet.packageName, tapplet.version);
-    const filePath = path_1.default.join(folderPath, `${tapplet.packageName}.tar.gz`);
-    await downloadFile(folderPath, filePath, tapplet.source.location.npm.distTarball);
-    await extractTarball(folderPath, filePath);
+    const tapplet = (0, get_tapplet_1.getTappletCandidate)(manifestPath);
+    await downloadFile(folderPath, tarballPath, tapplet.source.location.npm.distTarball);
+    await extractTarball(folderPath, tarballPath);
     // Validate checksum
-    const calculatedIntegrity = await (0, hash_calculator_1.getFileIntegrity)(filePath);
+    const calculatedIntegrity = await (0, hash_calculator_1.getFileIntegrity)(tarballPath);
     if (calculatedIntegrity !== tapplet.source.location.npm.integrity)
         throw new Error(`The integrity mismatch! Calculated (${calculatedIntegrity}) is different from the registry value (${tapplet.source.location.npm.integrity})`);
     //TODO remove folder after was extracted and checked
@@ -35174,13 +35178,9 @@ function fetchTappletCandidateData(tapplet) {
     return tappletToRegister;
 }
 exports.fetchTappletCandidateData = fetchTappletCandidateData;
-function getTappletCandidate(packageName) {
-    const jsonDir = core.getInput('dir');
-    const manifestPath = path.resolve('src', `${packageName}`, 'tapplet.manifest.json');
-    const platformPath = core.toPlatformPath(manifestPath);
-    core.notice(`Tapplet manifest dir: ${jsonDir}`);
-    core.notice(`Tapplet manifest platformPath: ${platformPath}`);
-    const tappData = fs.readFileSync(platformPath, 'utf8');
+function getTappletCandidate(manifestPath) {
+    core.notice(`Tapplet manifest platformPath: ${manifestPath}`);
+    const tappData = fs.readFileSync(manifestPath, 'utf8');
     return JSON.parse(tappData);
 }
 exports.getTappletCandidate = getTappletCandidate;

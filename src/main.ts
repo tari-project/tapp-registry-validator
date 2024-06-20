@@ -9,12 +9,16 @@ import { downloadAndExtractPackage } from './scripts/checksum/tapplet-installer'
 export async function run(): Promise<void> {
   try {
     const packageName: string = core.getInput('package-name')
+    const packageVersion: string = core.getInput('version')
     core.notice(`The ${packageName} tapplet registration process started...`)
     // const url: string = core.getInput('package-url')
     // const downloadPath = path.resolve('src', 'tapplet-candidate')
 
     // Download the tapplet package and extract to verify the content
-    const tappletCandidate = await downloadAndExtractPackage(packageName)
+    const tappletCandidate = await downloadAndExtractPackage(
+      packageName,
+      packageVersion
+    )
     core.notice(`The ${tappletCandidate.displayName} tapplet extracted`)
 
     // Add new tapplet to the registry
