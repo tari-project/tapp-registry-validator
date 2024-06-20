@@ -9,7 +9,7 @@ import { downloadAndExtractPackage } from './scripts/checksum/tapplet-installer'
 export async function run(): Promise<void> {
   try {
     const packageName: string = core.getInput('package-name')
-    const packageVersion: string = core.getInput('version')
+    const packageVersion: string = core.getInput('package-version')
     core.notice(`The ${packageName} tapplet registration process started...`)
     // const url: string = core.getInput('package-url')
     // const downloadPath = path.resolve('src', 'tapplet-candidate')

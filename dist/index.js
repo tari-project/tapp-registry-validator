@@ -34536,7 +34536,7 @@ const tapplet_installer_1 = __nccwpck_require__(2936);
 async function run() {
     try {
         const packageName = core.getInput('package-name');
-        const packageVersion = core.getInput('version');
+        const packageVersion = core.getInput('package-version');
         core.notice(`The ${packageName} tapplet registration process started...`);
         // const url: string = core.getInput('package-url')
         // const downloadPath = path.resolve('src', 'tapplet-candidate')
