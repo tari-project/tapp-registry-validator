@@ -1,6 +1,5 @@
 import * as core from '@actions/core'
 import { addTappletToRegistry } from './registry'
-import { getTappIntegrity } from './scripts/checksum/hash-calculator'
 import { downloadAndExtractPackage } from './scripts/checksum/tapplet-installer'
 
 /**
@@ -17,12 +16,6 @@ export async function run(): Promise<void> {
     // Download the tapplet package and extract to verify the content
     const tappletCandidate = await downloadAndExtractPackage(packageName)
     core.notice(`The ${tappletCandidate.displayName} tapplet extracted`)
-
-    // Validate checksum
-    // const integrity = await getTappIntegrity(packageName)
-    // core.notice(
-    //   `The ${tappletCandidate.displayName} tapplet integrity: ${integrity}`
-    // )
 
     // Add new tapplet to the registry
     await addTappletToRegistry(tappletCandidate)

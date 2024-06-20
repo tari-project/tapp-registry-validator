@@ -37,7 +37,9 @@ export type Repository = Infer<typeof RepositoryStruct>
 
 export const LocationStruct = object({
   packageName: string(),
-  registry: string()
+  registry: string(),
+  distTarball: string(),
+  integrity: string()
 })
 export const SourceStruct = object({
   location: record(enums(['npm']), LocationStruct)

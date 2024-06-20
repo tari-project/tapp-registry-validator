@@ -1,18 +1,15 @@
-name: 'Create Tapplets Registry PR'
-
-# Add your action's branding here. This will appear on the GitHub Marketplace.
+name: 'Check Tapplet'
+description:
+  'Check if the tapplet meets the requirements to be added to the registry'
 branding:
-  icon: 'heart'
+  icon: 'check-circle'
   color: 'yellow'
 
-# Define your inputs here.
 inputs:
   package-name:
-    description: 'Tapplet package name'
-    default: 'tapp-example'
+    description: 'The tapplet package name'
     required: true
 
-# Define your outputs here.
 outputs:
   status:
     description: 'Status of tapplet registration process'

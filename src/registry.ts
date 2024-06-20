@@ -7,7 +7,6 @@ import {
   fetchTappletCandidateData,
   getTappletRegistry
 } from './scripts/tapplets/get-tapplet'
-import { getTappIntegrity } from './scripts/checksum/hash-calculator'
 import * as core from '@actions/core'
 
 export function updateRegisteredTapplet(
@@ -39,21 +38,9 @@ export async function addTappletToRegistry(
   // Read the content of the current registry JSON file
   const registry: TappletsRegistry = getTappletRegistry()
 
-  // Validate checksum
-  const integrity = await getTappIntegrity(tapplet.packageName)
-  core.notice(`The ${tapplet.displayName} integrity: ${integrity}`)
-
-  //TODO
-  // if (checksum !== tapplet.manifestVersion)
-  //   throw new Error(
-  //     `Invalid Snap manifest: manifest shasum does not match computed shasum. ${checksum}`
-  //   )
-
   //TODO fill all fileds
-  const tappletToRegister: RegisteredTapplet = fetchTappletCandidateData(
-    tapplet,
-    integrity
-  )
+  const tappletToRegister: RegisteredTapplet =
+    fetchTappletCandidateData(tapplet)
 
   // Add the new field to the JSON data
   updateRegisteredTapplet(registry, tappletToRegister, tapplet.version)

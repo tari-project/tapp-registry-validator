@@ -4,13 +4,17 @@ import * as path from 'path'
 import { SemVerVersion } from '@metamask/utils'
 import { TappletCandidate } from 'src/types/tapplet'
 import { RegisteredTapplet, TappletsRegistry } from 'src/types/tapp-registry'
+import { IMAGES_DIR, SRC_DIR } from 'src/constants'
 
 export function fetchTappletCandidateData(
-  tapplet: TappletCandidate,
-  integrity: string
+  tapplet: TappletCandidate
 ): RegisteredTapplet {
-  const tappLogoPath = `src/${tapplet.packageName}/assets/logo.svg`
-  const registryUrl = `${tapplet.source.location.npm.registry}/${tapplet.packageName}/-/${tapplet.packageName}-${tapplet.version}.tgz`
+  const logoFile = path.join(
+    SRC_DIR,
+    tapplet.packageName,
+    IMAGES_DIR,
+    'logo.svg'
+  )
 
   const tappletToRegister: RegisteredTapplet = {
     id: tapplet.packageName,
@@ -20,16 +24,15 @@ export function fetchTappletCandidateData(
       codeowners: tapplet.repository.codeowners,
       audits: [],
       category: tapplet.category,
-      logoPath: core.toPlatformPath(tappLogoPath)
+      logoPath: core.toPlatformPath(logoFile)
     },
     versions: {
       [tapplet.version as SemVerVersion]: {
-        integrity,
-        registryUrl
+        integrity: tapplet.source.location.npm.integrity,
+        registryUrl: tapplet.source.location.npm.distTarball
       }
     }
   }
-  core.notice(`Tapplet data fetched: ${registryUrl}`)
   return tappletToRegister
 }
 

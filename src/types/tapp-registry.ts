@@ -31,7 +31,7 @@ export type Audit = Infer<typeof AuditStruct>
 
 export const ImagePathStruct = pattern(
   string(),
-  /\.\/images\/.*\/\d+\.(?:png|jpe?g)$/u
+  /\.\/images\/.*\/\d+\.(?:png|jpe?g|svg)$/u
 )
 
 export const ChecksumStruct = size(

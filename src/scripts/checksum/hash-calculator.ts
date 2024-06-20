@@ -76,13 +76,10 @@ function decodeHex(s: string): Buffer {
   return buffer
 }
 
-export async function getTappIntegrity(
-  tappletName: string,
+export async function getFileIntegrity(
+  filePath: string,
   sha = 512
 ): Promise<string> {
-  const tappletPath = `src/${tappletName}`
-  const filePath = path.join(tappletPath, `${tappletName}.tar.gz`)
-
   const shasumOutput = await readData(filePath, sha)
   const decodedShasum = decodeHex(shasumOutput)
   const convertedShasum = base64.fromByteArray(decodedShasum)
