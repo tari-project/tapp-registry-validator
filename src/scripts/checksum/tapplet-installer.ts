@@ -112,9 +112,6 @@ export async function downloadAndExtractPackage(
   const manifestPath = path.join(folderPath, MANIFEST_FILE)
   const tarballPath = path.join(folderPath, `${packageName}.tar.gz`)
 
-  console.log('tapplet manifest', manifestPath)
-  console.log('tapplet tarball', tarballPath)
-
   // Read the content of the tapplet manifest to be registered
   const tapplet: TappletCandidate = getTappletCandidate(manifestPath)
 
@@ -129,9 +126,12 @@ export async function downloadAndExtractPackage(
   const calculatedIntegrity = await getFileIntegrity(tarballPath)
   if (calculatedIntegrity !== tapplet.source.location.npm.integrity)
     throw new Error(
-      `The integrity mismatch! Calculated (${calculatedIntegrity}) is different from the registry value (${tapplet.source.location.npm.integrity})`
+      `The integrity mismatch! Calculated (${calculatedIntegrity}) is different from the value in the manifest (${tapplet.source.location.npm.integrity})`
     )
 
+  console.log(
+    `Integrity check success! Calculated (${calculatedIntegrity}) is the same as the value in the manifest (${tapplet.source.location.npm.integrity})`
+  )
   //TODO remove folder after was extracted and checked
   removeFolderRecursive(folderPath)
 

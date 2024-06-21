@@ -60,7 +60,6 @@ async function readData(filePath: string, sha: number): Promise<string> {
           reject(new Error())
         } else {
           const hash = calculateHash(data, sha)
-          console.log('hash', hash)
           resolve(hash)
         }
       })
