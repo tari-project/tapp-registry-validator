@@ -19,11 +19,7 @@ export function copyImages(sourcePath: string, destinationPath: string): void {
     const fileExtension = path.extname(file).toLowerCase()
 
     // Check if the file is an image with.svg or.jpg or .png extension
-    if (
-      fileExtension === '.svg' ||
-      fileExtension === '.jpg' ||
-      fileExtension === '.png'
-    ) {
+    if (file.endsWith('background.svg') || file.endsWith('logo.svg')) {
       const destinationPath = path.join(destinationFolder, file)
 
       // Copy the file
