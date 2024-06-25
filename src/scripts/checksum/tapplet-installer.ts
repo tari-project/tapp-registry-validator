@@ -7,6 +7,7 @@ import { TappletCandidate } from 'src/types/tapplet'
 import { getTappletCandidate } from '../tapplets/get-tapplet'
 import { MANIFEST_FILE, SRC_DIR } from 'src/constants'
 import { getFileIntegrity } from './hash-calculator'
+import { copyImages } from '../tapplets/copy-images'
 
 interface DownloadError {
   type: 'request' | 'io'
@@ -59,16 +60,13 @@ export async function downloadFile(
 }
 
 export async function extractTarball(
-  folderPath: string,
-  filePath: string
+  filePath: string,
+  outputDirPath: string
 ): Promise<void> {
   try {
-    const outputDir = await fs.promises.mkdir(
-      path.join(folderPath, 'package'),
-      {
-        recursive: true
-      }
-    )
+    const outputDir = await fs.promises.mkdir(outputDirPath, {
+      recursive: true
+    })
 
     const gunzip = zlib.createGunzip({})
     const extract = tar.extract({
@@ -111,6 +109,7 @@ export async function downloadAndExtractPackage(
   const folderPath = path.join(SRC_DIR, packageName, packageVersion)
   const manifestPath = path.join(folderPath, MANIFEST_FILE)
   const tarballPath = path.join(folderPath, `${packageName}.tar.gz`)
+  const tempTappDirPath = path.join(folderPath, 'temp-package')
 
   // Read the content of the tapplet manifest to be registered
   const tapplet: TappletCandidate = getTappletCandidate(manifestPath)
@@ -120,7 +119,10 @@ export async function downloadAndExtractPackage(
     tarballPath,
     tapplet.source.location.npm.distTarball
   )
-  await extractTarball(folderPath, tarballPath)
+  await extractTarball(tarballPath, tempTappDirPath)
+
+  // copy logo and background files from package to the tapplet registry repo
+  copyImages(tempTappDirPath, folderPath)
 
   // Validate checksum
   const calculatedIntegrity = await getFileIntegrity(tarballPath)
@@ -132,7 +134,7 @@ export async function downloadAndExtractPackage(
   console.log(
     `Integrity check success! Calculated (${calculatedIntegrity}) is the same as the value in the manifest (${tapplet.source.location.npm.integrity})`
   )
-  //TODO remove folder after was extracted and checked
+  // remove folder after was extracted and checked
   removeFolderRecursive(folderPath)
 
   return tapplet
