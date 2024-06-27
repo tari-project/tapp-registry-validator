@@ -28932,12 +28932,13 @@ function fromByteArray (uint8) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MANIFEST_FILE = exports.IMAGES_DIR = exports.SRC_DIR = exports.PR_TITLE_PREFIX = exports.BASE_BRANCH = exports.TAPPLET_REGISTRY_REPO = void 0;
+exports.MANIFEST_FILE = exports.VER_DIR = exports.IMAGES_DIR = exports.SRC_DIR = exports.PR_TITLE_PREFIX = exports.BASE_BRANCH = exports.TAPPLET_REGISTRY_REPO = void 0;
 exports.TAPPLET_REGISTRY_REPO = 'tapp-registry';
 exports.BASE_BRANCH = 'main';
 exports.PR_TITLE_PREFIX = 'New Tapplet:';
 exports.SRC_DIR = 'src';
 exports.IMAGES_DIR = 'images';
+exports.VER_DIR = 'versions';
 exports.MANIFEST_FILE = 'tapplet.manifest.json';
 
 
@@ -28988,7 +28989,6 @@ async function run() {
         const tappletCandidate = await (0, tapplet_installer_1.downloadAndExtractPackage)(packageName, packageVersion);
         core.notice(`The ${tappletCandidate.displayName} tapplet extracted`);
         // Set outputs for other workflow steps to use
-        // TODO set output
         core.setOutput('status', true);
     }
     catch (error) {
@@ -29195,9 +29195,9 @@ async function downloadFile(folderPath, filePath, url) {
     }
 }
 exports.downloadFile = downloadFile;
-async function extractTarball(folderPath, filePath) {
+async function extractTarball(filePath, outputDirPath) {
     try {
-        const outputDir = await fs_1.default.promises.mkdir(path_1.default.join(folderPath, 'package'), {
+        const outputDir = await fs_1.default.promises.mkdir(outputDirPath, {
             recursive: true
         });
         const gunzip = zlib.createGunzip({});
@@ -29234,19 +29234,20 @@ async function extractTarball(folderPath, filePath) {
 }
 exports.extractTarball = extractTarball;
 async function downloadAndExtractPackage(packageName, packageVersion) {
-    const folderPath = path_1.default.join(constants_1.SRC_DIR, packageName, packageVersion);
+    const folderPath = path_1.default.join(constants_1.SRC_DIR, packageName, constants_1.VER_DIR, packageVersion);
     const manifestPath = path_1.default.join(folderPath, constants_1.MANIFEST_FILE);
     const tarballPath = path_1.default.join(folderPath, `${packageName}.tar.gz`);
+    const tempTappDirPath = path_1.default.join(folderPath, 'temp-package');
     // Read the content of the tapplet manifest to be registered
     const tapplet = (0, get_tapplet_1.getTappletCandidate)(manifestPath);
     await downloadFile(folderPath, tarballPath, tapplet.source.location.npm.distTarball);
-    await extractTarball(folderPath, tarballPath);
+    await extractTarball(tarballPath, tempTappDirPath);
     // Validate checksum
     const calculatedIntegrity = await (0, hash_calculator_1.getFileIntegrity)(tarballPath);
     if (calculatedIntegrity !== tapplet.source.location.npm.integrity)
         throw new Error(`The integrity mismatch! Calculated (${calculatedIntegrity}) is different from the value in the manifest (${tapplet.source.location.npm.integrity})`);
     console.log(`Integrity check success! Calculated (${calculatedIntegrity}) is the same as the value in the manifest (${tapplet.source.location.npm.integrity})`);
-    //TODO remove folder after was extracted and checked
+    // remove folder after was extracted and checked
     removeFolderRecursive(folderPath);
     return tapplet;
 }
@@ -29307,7 +29308,7 @@ const fs = __importStar(__nccwpck_require__(7147));
 const path = __importStar(__nccwpck_require__(1017));
 const constants_1 = __nccwpck_require__(9042);
 function fetchTappletCandidateData(tapplet) {
-    const logoFile = path.join(constants_1.SRC_DIR, tapplet.packageName, constants_1.IMAGES_DIR, 'logo.svg');
+    const imagePath = path.join(constants_1.SRC_DIR, tapplet.packageName, constants_1.VER_DIR, constants_1.IMAGES_DIR);
     const tappletToRegister = {
         id: tapplet.packageName,
         metadata: {
@@ -29316,7 +29317,8 @@ function fetchTappletCandidateData(tapplet) {
             codeowners: tapplet.repository.codeowners,
             audits: [],
             category: tapplet.category,
-            logoPath: core.toPlatformPath(logoFile)
+            logoPath: core.toPlatformPath(path.join(imagePath, 'logo.svg')),
+            backgroundPath: core.toPlatformPath(path.join(imagePath, 'background.svg'))
         },
         versions: {
             [tapplet.version]: {
@@ -29328,16 +29330,16 @@ function fetchTappletCandidateData(tapplet) {
     return tappletToRegister;
 }
 exports.fetchTappletCandidateData = fetchTappletCandidateData;
-function getTappletCandidate(manifestPath) {
-    core.notice(`Tapplet manifest platformPath: ${manifestPath}`);
-    const tappData = fs.readFileSync(manifestPath, 'utf8');
+function getTappletCandidate(manifestFilePath) {
+    core.notice(`Tapplet manifest file path: ${manifestFilePath}`);
+    const tappData = fs.readFileSync(manifestFilePath, 'utf8');
     return JSON.parse(tappData);
 }
 exports.getTappletCandidate = getTappletCandidate;
 function getTappletRegistry() {
     const manifestPath = path.resolve('tapplets-registry.manifest.json');
     const platformPath = core.toPlatformPath(manifestPath);
-    core.notice(`Tapplet registry manifest platformPath: ${platformPath}`);
+    core.notice(`Tapplet registry manifest file path: ${platformPath}`);
     const tappData = fs.readFileSync(platformPath, 'utf8');
     return JSON.parse(tappData);
 }
