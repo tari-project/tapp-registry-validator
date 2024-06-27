@@ -19,7 +19,6 @@ export async function run(): Promise<void> {
     core.notice(`The ${tappletCandidate.displayName} tapplet extracted`)
 
     // Set outputs for other workflow steps to use
-    // TODO set output
     core.setOutput('status', true)
   } catch (error) {
     // Fail the workflow run if an error occurs

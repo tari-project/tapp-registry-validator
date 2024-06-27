@@ -55,7 +55,8 @@ export const RegisteredTappletStruct = object({
     codeowners: array(string()),
     audits: optional(array(AuditStruct)),
     category: optional(CategoryEnums),
-    logoPath: ImagePathStruct
+    logoPath: ImagePathStruct,
+    backgroundPath: ImagePathStruct
   }),
   versions: record(VersionStruct, RegisteredTappletVersionStruct)
 })

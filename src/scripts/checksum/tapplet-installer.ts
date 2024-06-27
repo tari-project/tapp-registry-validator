@@ -5,9 +5,8 @@ import * as zlib from 'zlib'
 import * as tar from 'tar'
 import { TappletCandidate } from 'src/types/tapplet'
 import { getTappletCandidate } from '../tapplets/get-tapplet'
-import { MANIFEST_FILE, SRC_DIR } from 'src/constants'
+import { MANIFEST_FILE, SRC_DIR, VER_DIR } from 'src/constants'
 import { getFileIntegrity } from './hash-calculator'
-import { copyImages } from '../tapplets/copy-images'
 
 interface DownloadError {
   type: 'request' | 'io'
@@ -106,7 +105,7 @@ export async function downloadAndExtractPackage(
   packageName: string,
   packageVersion: string
 ): Promise<TappletCandidate> {
-  const folderPath = path.join(SRC_DIR, packageName, packageVersion)
+  const folderPath = path.join(SRC_DIR, packageName, VER_DIR, packageVersion)
   const manifestPath = path.join(folderPath, MANIFEST_FILE)
   const tarballPath = path.join(folderPath, `${packageName}.tar.gz`)
   const tempTappDirPath = path.join(folderPath, 'temp-package')
@@ -120,9 +119,6 @@ export async function downloadAndExtractPackage(
     tapplet.source.location.npm.distTarball
   )
   await extractTarball(tarballPath, tempTappDirPath)
-
-  // copy logo and background files from package to the tapplet registry repo
-  copyImages(tempTappDirPath, folderPath)
 
   // Validate checksum
   const calculatedIntegrity = await getFileIntegrity(tarballPath)
